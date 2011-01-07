@@ -1,0 +1,58 @@
+Preliminaries: Pairwise Independent Hash Functions
+--------------------------------------------------
+
+One benefit of the count-min sketch is that it does not require p-wise
+independent hash families (a strong independence guarantee that requires
+sophisticated mathematical machinery); it only requires pairwise
+independent hash functions.  Unfortunately, the subject of universal
+hash families is not one usually covered in undergraduate computer
+science, so in this section I will attempt to explicate enough of the
+background theory so that we can generate the set of 2-independent hash
+functions necessary to implement a count min sketch.
+
+----
+
+Our first question is one of terminology.  There is a somewhat diverse
+set of naming conventions for hash families which I will attempt to
+explicate here.  We will assume the following shared conventions: our
+hash family is a family of functions from ``M → N`` where ``M = {0, 1,
+..., m-1}`` and ``N = {0, 1, ..., n-1}`` with ``m >= n``.  M corresponds
+to our “universe”, the possibly values being hashed, while N is the
+range of the hash function.  This is the conventioned assumed by Motwani
+and Raghavan in *Randomized Algorithms*, which Cormode and Muthukrishnan
+reference in their paper.
+
+The weakest independence guarantee is as follows:
+
+    (WEAK) UNIVERSAL HASH FAMILY or (WEAK) 2-UNIVERSAL HASH FAMILY
+
+    For all x, y ∈ M such that x != y, and for h chosen uniformly at
+    random from H, ::
+
+        Pr[h(x) = h(y)] ≤ 1/n
+
+    We shall abbreviate this subsequently as::
+
+        ∀ x,y ∈ M, x != y. Pr[h(x) = h(y)] ≤ 1/n
+
+(Errata: One set of notes [1] I consulted claimed that ``Pr[h(x) = h(y)
+= d/n]`` indicates a d-universal family; however, this appears to
+contradict the common formulation of a weak 2-universal hash family.
+Maybe this is an off by one?]
+
+Note that, definitionally speaking, 2-universal != 2-independent.  The
+name 2-universal alludes to the fact that we are only verifying the
+probabilities pairwise between elements of the universe, so they behave
+*like* pairwise independent random variables.  Strictly speaking, this
+is weaker than saying they are actually pairwise independent, as the
+following definition says:
+
+    STRONG UNIVERSAL HASH FAMILY
+    or (STRONGLY) 2-INDEPENDENT UNIVERSAL HASH FAMILY::
+
+        ∀ x,y ∈ M, a,b ∈ N.
+            Pr[h(x) = a ∧ h(y) = b] <= 1/n²
+
+
+
+[1] http://courses.csail.mit.edu/6.851/spring07/erik/L11.pdf
