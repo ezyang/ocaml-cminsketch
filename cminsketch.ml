@@ -47,6 +47,16 @@ let step_matrix a i j c = a.(i).(j) <- a.(i).(j) + c
 (** Finds the minimum value of an array. *)
 let minimum a = Array.fold_left min max_int a
 
+(** Finds the median value of an array.  Prefers the lower median
+ * if the number of elements is even. *)
+(* kind of inefficient; would be better to implement a
+ * selection algorithm *)
+let median a =
+    let b = Array.copy a
+    and l = Array.length a in
+    let () = Array.sort compare b in
+    b.(l/2)
+
 type sketch = { lg_width : int;
                 count: int array array;
                 hash_functions : int array }
@@ -76,11 +86,16 @@ let delta s = 1. /. exp (float_of_int (Array.length s.count))
 let update s ~ix ~c =
     Array.iteri (fun i a -> step_matrix s.count i (multiply_shift s.lg_width a ix) c) s.hash_functions
 
-let query s ~ix =
-    (* No fusion :-( so this generates an intermediate data structure
-     * that is immediately discarded.  We could probably write a
-     * minimum_mapi function but meh *)
-    minimum (Array.mapi (fun i a -> s.count.(i).(multiply_shift s.lg_width a ix)) s.hash_functions)
+let get_count s ix =
+    fun i a -> s.count.(i).(multiply_shift s.lg_width a ix)
+
+let get_counts s ~ix =
+    Array.mapi (get_count s ix) s.hash_functions
+
+(* No fusion, so this generates an intermediate data structure
+ * that is immediately discarded. *)
+let  query s ~ix = minimum (get_counts s ix)
+let nquery s ~ix =  median (get_counts s ix)
 
 (* To implement: *)
 (* range_query - needs customized array of sketches *)
@@ -88,13 +103,13 @@ let query s ~ix =
 (* phi_quantiles, heavy_hitters *)
 
 let () =
-    let x = make 2.0 0.9 in
+    let x = make 1.5 0.9 in
     update x 3 4;
-    update x 3 2;
+    update x 3 (-6);
     update x 24435 5;
     update x 2323434 1;
     update x 223434 1;
-    print_int (query x 234);
+    print_int (nquery x 3);
     print_string "\n";
     print_float (epsilon x);
     print_string "\n";

@@ -58,18 +58,27 @@ val epsilon : sketch -> float
 (** Returns the true error probability for a sketch. *)
 val delta : sketch -> float
 
-(** Updates a sketch adding [c] to the field [ix]. *)
+(** O(). Updates a sketch adding [c] to the field [ix]. *)
 val update : sketch -> ix:int -> c:int -> unit
 
-(** Estimates the count of the field [ix].
+(** Estimates the count of the field [ix] if all the actual counts
+    are non-negative.  Use [nquery] if actual counts may be negative.
 
-    If all actual counts are non-negative, this estimate is never
+    This estimate is never
     less than the true value and, with probability of at least
     [1 - delta], the overestimation is no greater than [epsilon * |a|1],
     where [|a|1] denotes the L1 (taxicab) norm on the actual vector
-    [a] (i.e. the sum of all updates done to all keys in the sketch.)
-
-    If some actual counts are negative, with probability of at least
-    [1 - delta^(1/4)], the estimate falls within [3 * epsilon * |a|1] of
-    the true value. *)
+    [a] (i.e. the sum of all updates done to all keys in the sketch.) *)
 val query : sketch -> ix:int -> int
+
+(** Estimates the count of the field [ix].  This works in both negative
+    and non-negative actual counts, but is not as accurate as [query]
+    in the non-negative case.
+
+    With probability of at least [1 - delta^(1/4)], the estimate falls
+    within [3  epsilon * |a|1] of the true value. *)
+val nquery : sketch -> ix:int -> int
+
+(** Estimates the inner product of the two sketches, that is,
+    [sum_i(a.(i) *  b.(i))]. *)
+(**val inner_product_query : sketch -> sketch -> int*)
