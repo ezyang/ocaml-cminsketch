@@ -91,6 +91,20 @@ val query : sketch -> ix:int -> int
     due to the use of an [O(n * log(n)] median algorithm. *)
 val nquery : sketch -> ix:int -> int
 
-(** Estimates the dot product of the two sketches, that is,
-    [sum_i(a.(i) *  b.(i))]. *)
+(** [O(1/epsilon) * log(1/delta)]. Estimates the dot product of the two
+    sketches, that is, [sum_i(a.(i) *  b.(i))], when all actual counts
+    in both sketches are non-negative.
+
+    This estimate is never less than the true value and, with
+    probability of at least [1 - delta], the overestimation is no
+    greater than [epsilon * |a|1 * |b|1].  [query] is in fact
+    a specialiation of this operation in the case that [b] is
+    a unit vector. *)
 val dot_product_query : sketch -> sketch -> int
+
+(** Estimates the dot product the two sketches for negative and
+    non-negative cases.  As with [nquery], this suffers an
+    accuracy hit, and furthermore, there are no known practical
+    uses for the dot product in the case of negative vectors.
+    Included for completeness. *)
+val dot_product_nquery : sketch -> sketch -> int

@@ -104,18 +104,20 @@ let get_count s ix =
 let get_counts s ~ix =
     Array.mapi (get_count s ix) s.hash_functions
 
-(* No fusion, so this generates an intermediate data structure
- * that is immediately discarded. *)
-let  query s ~ix = minimum (get_counts s ix)
-let nquery s ~ix =  median (get_counts s ix)
+(* No fusion, so these implementations generate an intermediate data
+ * structure that is immediately discarded. *)
+
+let query s ~ix = minimum (get_counts s ix)
+let nquery s ~ix = median (get_counts s ix)
 
 (* We deviate from the original naming, because "inner product" is too
  * for the algorithm they've described. *)
-let dot_product_query a b =
-    minimum (Array.map2 dot_product a.count b.count)
+let dot_product_query a b = minimum (Array.map2 dot_product a.count b.count)
+(* Probably not actually useful. *)
+let dot_product_nquery a b = median (Array.map2 dot_product a.count b.count)
 
 (* To implement: *)
-(* range_query - needs customized array of sketches *)
+(* range_query - needs hierarchical array of sketches *)
 (* phi_quantiles, heavy_hitters *)
 
 let () =
