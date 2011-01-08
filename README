@@ -1,0 +1,10 @@
+OCaml Count-Min Sketch
+----------------------
+
+Most of the documentation can be found in cminsketch.mli.  Here are
+some basic instructions for building:
+
+    ocamlbuild .docdir/index.html       # get the docs
+    ocamlbuild cminsketch.native        # get a silly incomplete test script
+
+You will need Batteries Included <http://batteries.forge.ocamlcore.org/>.
