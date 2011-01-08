@@ -1,3 +1,5 @@
+open Batteries
+
 (* Multiply shift is done on normal ints.  These are not necessarily
  * 32-bit or 64-bit (usually, they have one bit less precision), so
  * care must be taken. *)
@@ -57,28 +59,38 @@ let median a =
     let () = Array.sort compare b in
     b.(l/2)
 
+(** Computes the dot product of two arrays ("vectors").  Arrays must have exactly the
+    same dimensions. *)
+let dot_product a b =
+    if Array.length a != Array.length b then invalid_arg "Cminsketch.dot_product: dimensions mismatch" else
+    let len = Array.length a in
+    let rec loop acc = function i when i = len -> acc
+                                     | i -> loop (acc + a.(i) * b.(i)) (i + 1) in
+    loop 0 0
+
 type sketch = { lg_width : int;
                 count: int array array;
                 hash_functions : int array }
+
+let make_int ~depth ~width =
+    if depth <= 0 then invalid_arg "Cminsketch.make_raw: depth must be greater than 0" else
+    if width <= 0 then invalid_arg "Cminsketch.make_raw: width must be greater than 0" else
+    (* We fudge the width to be a little larger, ensuring that it
+     * is a power of two for the benefit of our hash family. *)
+    let m = int_ceil (lg (float_of_int width)) in
+    let rounded_width = 1 lsl m in
+    { lg_width = m;
+      count = Array.make_matrix depth rounded_width 0;
+      hash_functions = Array.init depth (fun _ -> random_odd_int ());
+    }
 
 let make ~epsilon ~delta =
     if epsilon <= 0.0 then invalid_arg "Cminsketch.make: epsilon must be greater than 0.0" else
     if delta >= 1.0 then invalid_arg "Cminsketch.make: delta must be less than 1.0" else
     if delta <= 0.0 then invalid_arg "Cminsketch.make: delta must be greater than 0.0" else
-    (* We fudge the width to be a little larger, ensuring that it
-     * is a power of two for the benefit of our algorithm.  This means
-     * the actual epsilon you will get is smaller than what you
-     * originally specified. *)
-    let m = int_ceil (lg (euler /. epsilon)) in
-    if m < 0 then failwith "Cminsketch.make: internal error, lg_width less than 0" else
-    let width = 1 lsl m
-    and depth = int_ceil (log (1. /. delta)) in
-    if width <= 0 then failwith "Cminsketch.make: internal error, width less than 1" else
-    if depth <= 0 then failwith "Cminsketch.make: internal error, depth less than 1" else
-    { lg_width = m;
-      count = Array.make_matrix depth width 0;
-      hash_functions = Array.init depth (fun _ -> random_odd_int ());
-    }
+    let depth = int_ceil (log (1. /. delta))
+    and width = int_ceil (euler /. epsilon) in
+    make_int depth width
 
 let epsilon s = euler /. (float_of_int (1 lsl s.lg_width))
 let delta s = 1. /. exp (float_of_int (Array.length s.count))
@@ -97,9 +109,13 @@ let get_counts s ~ix =
 let  query s ~ix = minimum (get_counts s ix)
 let nquery s ~ix =  median (get_counts s ix)
 
+(* We deviate from the original naming, because "inner product" is too
+ * for the algorithm they've described. *)
+let dot_product_query a b =
+    minimum (Array.map2 dot_product a.count b.count)
+
 (* To implement: *)
 (* range_query - needs customized array of sketches *)
-(* inner_product_query *)
 (* phi_quantiles, heavy_hitters *)
 
 let () =
