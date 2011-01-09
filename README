@@ -5,6 +5,9 @@ Most of the documentation can be found in cminsketch.mli.  Here are
 some basic instructions for building:
 
     ocamlbuild .docdir/index.html       # get the docs
-    ocamlbuild cminsketch.native        # get a silly incomplete test script
+    ocamlbuild test.native              # to run the test script
 
-You will need Batteries Included <http://batteries.forge.ocamlcore.org/>.
+The library needs OCaml Batteries Included <http://batteries.forge.ocamlcore.org/>
+To run the test script, you will need ocamlgsl <http://oandrieu.nerim.net/ocaml/gsl/>.
+If you are on Ubuntu, these correspond to the ocaml-batteries-included
+and libocamlgsl-ocaml-dev packages.
