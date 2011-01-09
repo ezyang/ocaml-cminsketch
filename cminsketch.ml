@@ -94,6 +94,9 @@ let make ~epsilon ~delta =
 
 let epsilon s = euler /. (float_of_int (1 lsl s.lg_width))
 let delta s = 1. /. exp (float_of_int (Array.length s.count))
+let width s = 1 lsl s.lg_width
+let depth s = Array.length s.count
+let size s = (width s) * (depth s)
 
 let update s ~ix ~c =
     Array.iteri (fun i a -> step_matrix s.count i (multiply_shift s.lg_width a ix) c) s.hash_functions
@@ -119,18 +122,3 @@ let dot_product_nquery a b = median (Array.map2 dot_product a.count b.count)
 (* To implement: *)
 (* range_query - needs hierarchical array of sketches *)
 (* phi_quantiles, heavy_hitters *)
-
-let () =
-    let x = make 1.5 0.9 in
-    update x 3 4;
-    update x 3 (-6);
-    update x 24435 5;
-    update x 2323434 1;
-    update x 223434 1;
-    print_int (nquery x 3);
-    print_string "\n";
-    print_float (epsilon x);
-    print_string "\n";
-    print_float (delta x);
-    print_string "\n";
-    ()

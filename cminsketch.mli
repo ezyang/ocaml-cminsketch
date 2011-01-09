@@ -35,9 +35,10 @@ type sketch
 val multiply_shift : m:int -> a:int -> x:int -> int
 
 (** Create a count-min sketch for which the error in answering
-    a query is within a factor of [epsilon] with probability [delta].
-    You get more accurate results for small epsilon and large delta,
-    but use less memory for larger epsilon and smaller delta.
+    a query is within a factor of [epsilon], and gets it totally wrong
+    only with probability [delta].  You get more accurate results for
+    small epsilon and small delta, but use less memory for larger
+    epsilon and larger delta.
 
     More detailed bounds regarding [epsilon] and [delta] can be found
     in the relevant estimation functions.
@@ -64,6 +65,16 @@ val epsilon : sketch -> float
 
 (** Returns the true error probability for a sketch. *)
 val delta : sketch -> float
+
+(** Returns the width of the sketch. *)
+val width : sketch -> int
+
+(** Returns the depth of the sketch. *)
+val depth : sketch -> int
+
+(** Returns the size of the sketch.  This should be smaller than your
+    input space, otherwise you're not getting any benefit! *)
+val size : sketch -> int
 
 (** [O(log(1/delta))]. Updates a sketch adding [c] to the field [ix]. *)
 val update : sketch -> ix:int -> c:int -> unit
